@@ -1,0 +1,20 @@
+[
+    {
+        "op": "opa", 
+        "locks": [
+            {
+                "name": "opa_opb", 
+                "mode": "shared"
+            }
+        ]
+    }, 
+    {
+        "op": "opb", 
+        "locks": [
+            {
+                "name": "opa_opb", 
+                "mode": "exclusive"
+            }
+        ]
+    }
+]

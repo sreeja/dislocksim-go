@@ -14,3 +14,4 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 config/.DS_Store
+application/config/.DS_Store
