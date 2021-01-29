@@ -74,9 +74,10 @@ func do(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
 	app := args["app"][0]
 	op := args["op"][0]
+	granularity := os.Getenv("GRANULARITY")
 	oplock := os.Getenv("MODE")
 	locktype := os.Getenv("PLACEMENT")
-	err := execute(app, op, oplock, locktype)
+	err := execute(app, op, granularity, oplock, locktype)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(err.Error()))
@@ -85,13 +86,13 @@ func do(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func execute(app, op, oplock, locktype string) error {
+func execute(app, op, granularity, oplock, locktype string) error {
 	timetosleep, err := getexectime(app, op)
 	if err != nil {
 		return err
 	}
 
-	locks, err := getlocks(app, op, oplock, locktype)
+	locks, err := getlocks(app, op, granularity, oplock, locktype)
 	if err != nil {
 		return err
 	}
@@ -141,8 +142,8 @@ func getexectime(appname, opname string) (int, error) {
 	return -1, errors.New("Operation not found")
 }
 
-func getlockconfigs(appname, opname, oplock, locktype string) ([]OpLock, []LockType, error) {
-	oplockfile := "./config/locker/" + appname + "/oplock" + oplock + ".json"
+func getlockconfigs(appname, opname, granularity, oplock, locktype string) ([]OpLock, []LockType, error) {
+	oplockfile := "./config/locker/" + appname + "/granular" + granularity + "/oplock" + oplock + ".json"
 	oplockf, err := ioutil.ReadFile(oplockfile)
 	if err != nil {
 		return nil, nil, err
@@ -150,7 +151,7 @@ func getlockconfigs(appname, opname, oplock, locktype string) ([]OpLock, []LockT
 	var oplocks []OpLock
 	json.Unmarshal([]byte(string(oplockf)), &oplocks)
 
-	locktypefile := "./config/locker/" + appname + "/locktype" + locktype + ".json"
+	locktypefile := "./config/locker/" + appname + "/granular" + granularity + "/locktype" + locktype + ".json"
 	locktypef, err := ioutil.ReadFile(locktypefile)
 	if err != nil {
 		return nil, nil, err
@@ -161,8 +162,8 @@ func getlockconfigs(appname, opname, oplock, locktype string) ([]OpLock, []LockT
 	return oplocks, locktypes, nil
 }
 
-func getlocks(appname, opname, oplock, locktype string) ([]Lock, error) {
-	oplocks, locktypes, err := getlockconfigs(appname, opname, oplock, locktype)
+func getlocks(appname, opname, granularity, oplock, locktype string) ([]Lock, error) {
+	oplocks, locktypes, err := getlockconfigs(appname, opname, granularity, oplock, locktype)
 	if err != nil {
 		return nil, err
 	}
