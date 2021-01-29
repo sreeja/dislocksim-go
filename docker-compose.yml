@@ -19,6 +19,9 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    cap_add:
+      - NET_ADMIN
+    container_name: houston
     networks:
       dislocknet:
         ipv4_address: 172.21.0.51
@@ -38,6 +41,9 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    cap_add:
+      - NET_ADMIN
+    container_name: paris
     networks:
       dislocknet:
         ipv4_address: 172.21.0.52
@@ -57,6 +63,9 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    cap_add:
+      - NET_ADMIN
+    container_name: singapore
     networks:
       dislocknet:
         ipv4_address: 172.21.0.53
@@ -66,7 +75,11 @@ services:
 
 
   etcd0:
-    image: quay.io/coreos/etcd
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
     networks:
       dislocknet:
         ipv4_address: 172.21.0.41
@@ -91,7 +104,11 @@ services:
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
   etcd1:
-    image: quay.io/coreos/etcd
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
     networks:
       dislocknet:
         ipv4_address: 172.21.0.42
@@ -116,7 +133,11 @@ services:
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
   etcd2:
-    image: quay.io/coreos/etcd
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
     networks:
       dislocknet:
         ipv4_address: 172.21.0.43

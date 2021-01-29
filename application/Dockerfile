@@ -1,5 +1,6 @@
 FROM golang:1.15.6
 
+RUN apt-get update && apt-get install -y iproute2 iputils-ping
 
 RUN mkdir -p /usr/app
 RUN mkdir -p /usr/data

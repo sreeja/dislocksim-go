@@ -84,6 +84,7 @@ func do(w http.ResponseWriter, r *http.Request) {
 }
 
 func execute(app, op, granularity, oplock, locktype string) error {
+	start := time.Now()
 	timetosleep, err := getexectime(app, op)
 	if err != nil {
 		return err
@@ -118,7 +119,14 @@ func execute(app, op, granularity, oplock, locktype string) error {
 		}
 	}
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
+	defer logexectime(app, op, start)
 	return nil
+}
+
+func logexectime(app, op string, start time.Time) {
+	t := time.Now()
+	elapsed := t.Sub(start)
+	log.Printf("execution time for %v, %v :%v", app, op, elapsed)
 }
 
 func getexectime(appname, opname string) (int, error) {
