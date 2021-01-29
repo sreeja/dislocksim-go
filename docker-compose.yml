@@ -1,4 +1,10 @@
-version: "3"
+version: '3.4'
+
+networks:
+  dislocknet:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
 
 services:
   houston:
@@ -10,8 +16,12 @@ services:
       - "./data/houston:/usr/data"
     environment:
       - WHOAMI=houston
+      - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.51
     ports:
       - 6001:6000
     command: go run .
@@ -25,8 +35,12 @@ services:
       - "./data/paris:/usr/data"
     environment:
       - WHOAMI=paris
+      - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.52
     ports:
       - 6002:6000
     command: go run .
@@ -40,8 +54,12 @@ services:
       - "./data/singapore:/usr/data"
     environment:
       - WHOAMI=singapore
+      - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.53
     ports:
       - 6003:6000
     command: go run .
@@ -49,6 +67,9 @@ services:
 
   etcd0:
     image: quay.io/coreos/etcd
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.41
     ports:
       - 2379
     volumes:
@@ -62,15 +83,18 @@ services:
       - -advertise-client-urls
       - http://etcd0:2379
       - -listen-client-urls
-      - http://0.0.0.0:2379
+      - http://172.21.0.41:2379
       - -initial-advertise-peer-urls
       - http://etcd0:2380
       - -listen-peer-urls
-      - http://0.0.0.0:2380
+      - http://172.21.0.41:2380
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
   etcd1:
     image: quay.io/coreos/etcd
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.42
     ports:
       - 2379
     volumes:
@@ -84,15 +108,18 @@ services:
       - -advertise-client-urls
       - http://etcd1:2379
       - -listen-client-urls
-      - http://0.0.0.0:2379
+      - http://172.21.0.42:2379
       - -initial-advertise-peer-urls
       - http://etcd1:2380
       - -listen-peer-urls
-      - http://0.0.0.0:2380
+      - http://172.21.0.42:2380
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
   etcd2:
     image: quay.io/coreos/etcd
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.43
     ports:
       - 2379
     volumes:
@@ -106,11 +133,11 @@ services:
       - -advertise-client-urls
       - http://etcd2:2379
       - -listen-client-urls
-      - http://0.0.0.0:2379
+      - http://172.21.0.43:2379
       - -initial-advertise-peer-urls
       - http://etcd2:2380
       - -listen-peer-urls
-      - http://0.0.0.0:2380
+      - http://172.21.0.43:2380
       - -initial-cluster
       - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
 
