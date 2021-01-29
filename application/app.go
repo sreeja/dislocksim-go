@@ -7,7 +7,6 @@ import (
 
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -55,7 +54,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("created session")
 	defer session.Close()
 
 	handleRequests()
@@ -69,7 +67,6 @@ func handleRequests() {
 }
 
 func do(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Welcome to the HomePage!")
 	args := r.URL.Query()
 	app := args["app"][0]
 	op := args["op"][0]
@@ -79,9 +76,10 @@ func do(w http.ResponseWriter, r *http.Request) {
 	err := execute(app, op, granularity, oplock, locktype)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(err.Error()))
+		w.Write([]byte(err.Error() + "\n"))
 	} else {
 		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Successful request!\n"))
 	}
 }
 
