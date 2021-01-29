@@ -6,16 +6,15 @@ import (
 	"go.etcd.io/etcd/clientv3/concurrency"
 
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"time"
-	// "net"
-	"errors"
-	"net/http"
-	"sort"
 )
 
 var replicas map[string]int
