@@ -80,6 +80,7 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
+    container_name: etcd0
     networks:
       dislocknet:
         ipv4_address: 172.21.0.41
@@ -109,6 +110,7 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
+    container_name: etcd1
     networks:
       dislocknet:
         ipv4_address: 172.21.0.42
@@ -138,6 +140,7 @@ services:
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
+    container_name: etcd2
     networks:
       dislocknet:
         ipv4_address: 172.21.0.43
