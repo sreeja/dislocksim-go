@@ -32,7 +32,7 @@ func main() {
 	}
 
 	//setting up log file
-	filename := "./../data/log" + whoami
+	filename := "../data/log.txt"
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -42,8 +42,8 @@ func main() {
 	log.SetOutput(f)
 
 	// create etcd client
-	log.Println("Creating etcd client", time.Now())
-	cli, err = clientv3.New(clientv3.Config{Endpoints: []string{"etcd-" + strconv.Itoa(replicas[whoami]) + ":2379"}})
+	log.Println("Creating etcd client at", whoami, time.Now())
+	cli, err = clientv3.New(clientv3.Config{Endpoints: []string{"etcd" + strconv.Itoa(replicas[whoami]) + ":2379"}})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -56,6 +56,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("created session")
 	defer session.Close()
 
 	handleRequests()
