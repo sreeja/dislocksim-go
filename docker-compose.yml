@@ -1,0 +1,50 @@
+version: "3"
+
+
+services:
+  houston:
+    build:
+      context: ./application
+      dockerfile: Dockerfile
+    volumes:
+      - "./application:/usr/app"
+      - "./data/houston:/usr/data"
+    environment:
+      - WHOAMI=houston
+      - MODE=${MODE}
+      - PLACEMENT=${PLACEMENT}
+    ports:
+      - 6001:6000
+    command: go run .
+
+  paris:
+    build:
+      context: ./application
+      dockerfile: Dockerfile
+    volumes:
+      - "./application:/usr/app"
+      - "./data/paris:/usr/data"
+    environment:
+      - WHOAMI=paris
+      - MODE=${MODE}
+      - PLACEMENT=${PLACEMENT}
+    ports:
+      - 6002:6000
+    command: go run .
+
+  singapore:
+    build:
+      context: ./application
+      dockerfile: Dockerfile
+    volumes:
+      - "./application:/usr/app"
+      - "./data/singapore:/usr/data"
+    environment:
+      - WHOAMI=singapore
+      - MODE=${MODE}
+      - PLACEMENT=${PLACEMENT}
+    ports:
+      - 6003:6000
+    command: go run .
+
+
