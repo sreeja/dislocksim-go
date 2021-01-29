@@ -95,15 +95,15 @@ func execute(app, op, granularity, oplock, locktype string) error {
 		return err
 	}
 
-	reallocks := map[string]*rwlock.RWMutex{}
+	// reallocks := map[string]*rwlock.RWMutex{}
 	for l := range locks {
-		var l1 *rwlock.RWMutex
-		if val, ok := reallocks[locks[l].Name]; ok {
-			l1 = val
-		} else {
-			l1 = rwlock.NewRWMutex(session, locks[l].Name)
-			reallocks[locks[l].Name] = l1
-		}
+		// var l1 *rwlock.RWMutex
+		// if val, ok := reallocks[locks[l].Name]; ok {
+		// 	l1 = val
+		// } else {
+		l1 := rwlock.NewRWMutex(session, locks[l].Name)
+		// 	reallocks[locks[l].Name] = l1
+		// }
 		if locks[l].Mode == "shared" {
 			rlerr := l1.RLock()
 			defer l1.RUnlock()
