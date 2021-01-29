@@ -12,6 +12,10 @@
         "op": "opb", 
         "locks": [
             {
+                "name": "opd_opb", 
+                "mode": "exclusive"
+            },
+            {
                 "name": "opa_opb", 
                 "mode": "exclusive"
             }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "github.com/sreeja/etcd-exp/rwlock"
+	"github.com/sreeja/etcd-exp/rwlock"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/clientv3/concurrency"
 
@@ -11,10 +11,11 @@ import (
 	"log"
 	"os"
 	"strconv"
-	// "time"
+	"time"
 	// "net"
 	"errors"
 	"net/http"
+	"sort"
 )
 
 var replicas map[string]int
@@ -24,11 +25,14 @@ var cli *clientv3.Client
 var session *concurrency.Session
 
 func main() {
-	replicas = map[string]int{"houston": 1, "paris": 2, "singapore": 3}
+	replicas = map[string]int{"houston": 0, "paris": 1, "singapore": 2}
 	whoami = os.Getenv("WHOAMI")
+	if _, ok := replicas[whoami]; !ok {
+		log.Fatal("Replica not listed")
+	}
 
 	//setting up log file
-	filename := "/usr/data/log"
+	filename := "./../data/log" + whoami
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
@@ -38,7 +42,7 @@ func main() {
 	log.SetOutput(f)
 
 	// create etcd client
-	log.Println("CREATE CLIENT")
+	log.Println("Creating etcd client", time.Now())
 	cli, err = clientv3.New(clientv3.Config{Endpoints: []string{"etcd-" + strconv.Itoa(replicas[whoami]) + ":2379"}})
 	if err != nil {
 		log.Fatal(err)
@@ -46,7 +50,7 @@ func main() {
 	defer cli.Close()
 
 	// create etcd client session
-	log.Println("CREATE SESSION")
+	log.Println("Creating etcd session", time.Now())
 	//send TTL updates to server each 1s. If failed to send (client is down or without communications), lock will be released
 	session, err = concurrency.NewSession(cli, concurrency.WithTTL(1))
 	if err != nil {
@@ -60,14 +64,24 @@ func main() {
 
 func handleRequests() {
 	http.HandleFunc("/do", do)
+	log.Println("Listening at port 6000", time.Now())
 	log.Fatal(http.ListenAndServe(":6000", nil))
 }
 
 func do(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Welcome to the HomePage!")
-	// args := r.URL.Query()
-	// app := args["app"][0]
-	// op := args["op"][0]
+	args := r.URL.Query()
+	app := args["app"][0]
+	op := args["op"][0]
+	oplock := os.Getenv("MODE")
+	locktype := os.Getenv("PLACEMENT")
+	err := execute(app, op, oplock, locktype)
+	if err != nil {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		w.Write([]byte(err.Error()))
+	} else {
+		w.WriteHeader(http.StatusOK)
+	}
 	// timetosleep := getexectime(app, op)
 	// locks := getlocks(app, op)
 	// var reallocks map[Lock]*RWMutex
@@ -93,6 +107,48 @@ func do(w http.ResponseWriter, r *http.Request) {
 	// }
 }
 
+func execute(app, op, oplock, locktype string) error {
+	timetosleep, err := getexectime(app, op)
+	if err != nil {
+		return err
+	}
+
+	locks, err := getlocks(app, op, oplock, locktype)
+	if err != nil {
+		return err
+	}
+
+	reallocks := map[string]*rwlock.RWMutex{}
+	for l := range locks {
+		var l1 *rwlock.RWMutex
+		if val, ok := reallocks[locks[l].Name]; ok {
+			l1 = val
+		} else {
+			l1 = rwlock.NewRWMutex(session, locks[l].Name)
+			reallocks[locks[l].Name] = l1
+		}
+		if locks[l].Mode == "shared" {
+			rlerr := l1.RLock()
+			defer l1.RUnlock()
+			if rlerr != nil {
+				return rlerr
+			}
+		} else {
+			wlerr := l1.Lock()
+			defer l1.Unlock()
+			if wlerr != nil {
+				return wlerr
+			}
+		}
+	}
+	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
+	// for l := range reallocks {
+	// 	//release each lock
+
+	// }
+	return nil
+}
+
 func getexectime(appname, opname string) (int, error) {
 	configfile := "./config/application/" + appname + ".json"
 	f, err := ioutil.ReadFile(configfile)
@@ -111,11 +167,11 @@ func getexectime(appname, opname string) (int, error) {
 	return -1, errors.New("Operation not found")
 }
 
-func getlocks(appname, opname, oplock, locktype string) ([]Lock, error) {
+func getlockconfigs(appname, opname, oplock, locktype string) ([]OpLock, []LockType, error) {
 	oplockfile := "./config/locker/" + appname + "/oplock" + oplock + ".json"
 	oplockf, err := ioutil.ReadFile(oplockfile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var oplocks []OpLock
 	json.Unmarshal([]byte(string(oplockf)), &oplocks)
@@ -123,10 +179,19 @@ func getlocks(appname, opname, oplock, locktype string) ([]Lock, error) {
 	locktypefile := "./config/locker/" + appname + "/locktype" + locktype + ".json"
 	locktypef, err := ioutil.ReadFile(locktypefile)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var locktypes []LockType
 	json.Unmarshal([]byte(string(locktypef)), &locktypes)
+
+	return oplocks, locktypes, nil
+}
+
+func getlocks(appname, opname, oplock, locktype string) ([]Lock, error) {
+	oplocks, locktypes, err := getlockconfigs(appname, opname, oplock, locktype)
+	if err != nil {
+		return nil, err
+	}
 
 	var locks []Lock
 	for o := range oplocks {
@@ -141,5 +206,8 @@ func getlocks(appname, opname, oplock, locktype string) ([]Lock, error) {
 			}
 		}
 	}
+	sort.Slice(locks, func(i, j int) bool {
+		return locks[i].Name < locks[j].Name
+	})
 	return locks, nil
 }
