@@ -83,29 +83,6 @@ func do(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusOK)
 	}
-	// timetosleep := getexectime(app, op)
-	// locks := getlocks(app, op)
-	// var reallocks map[Lock]*RWMutex
-	// for l := range locks {
-	// 	//acquire each lock
-	// 	l1 := rwlock.NewRWMutex(session, l.Name)
-	// 	reallocks = append(reallocks, l1)
-	// 	reallocks
-	// 	if l.Mode == "shared" {
-	// 		rlerr := l1.RLock()
-	// 		defer l1.RUnlock()
-	// 		check(rlerr)
-	// 	} else {
-	// 		wlerr := l1.Lock()
-	// 		defer l1.Unlock()
-	// 		check(wlerr)
-	// 	}
-	// }
-	// time.Sleep(time.Duration(timetosleep) * time.Millisecond)
-	// for l := range reallocks {
-	// 	//release each lock
-
-	// }
 }
 
 func execute(app, op, oplock, locktype string) error {
@@ -143,10 +120,6 @@ func execute(app, op, oplock, locktype string) error {
 		}
 	}
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
-	// for l := range reallocks {
-	// 	//release each lock
-
-	// }
 	return nil
 }
 
