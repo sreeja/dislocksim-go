@@ -88,22 +88,16 @@ services:
       - 2379
     volumes:
       - etcd0-cent:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd0-cent
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd0-cent:2379
-      - -listen-client-urls
-      - http://172.21.0.61:2379
-      - -initial-advertise-peer-urls
-      - http://etcd0-cent:2380
-      - -listen-peer-urls
-      - http://172.21.0.61:2380
-      - -initial-cluster
-      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd0-cent
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd0-cent:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.61:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.61:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd0-cent:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cent-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd1-cent:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -118,22 +112,16 @@ services:
       - 2379
     volumes:
       - etcd1-cent:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd1-cent
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd1-cent:2379
-      - -listen-client-urls
-      - http://172.21.0.62:2379
-      - -initial-advertise-peer-urls
-      - http://etcd1-cent:2380
-      - -listen-peer-urls
-      - http://172.21.0.62:2380
-      - -initial-cluster
-      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd1-cent
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd1-cent:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.62:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.62:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd1-cent:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cent-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd2-cent:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -148,22 +136,17 @@ services:
       - 2379
     volumes:
       - etcd2-cent:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd2-cent
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd2-cent:2379
-      - -listen-client-urls
-      - http://172.21.0.63:2379
-      - -initial-advertise-peer-urls
-      - http://etcd2-cent:2380
-      - -listen-peer-urls
-      - http://172.21.0.63:2380
-      - -initial-cluster
-      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd2-cent
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd2-cent:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.63:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.63:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd2-cent:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-cent-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+
 
   etcd0-clust:
     build:
@@ -179,22 +162,16 @@ services:
       - 2379
     volumes:
       - etcd0-clust:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd0-clust
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd0-clust:2379
-      - -listen-client-urls
-      - http://172.21.0.71:2379
-      - -initial-advertise-peer-urls
-      - http://etcd0-clust:2380
-      - -listen-peer-urls
-      - http://172.21.0.71:2380
-      - -initial-cluster
-      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd0-clust
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd0-clust:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.71:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.71:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd0-clust:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-clust-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd1-clust:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -209,22 +186,16 @@ services:
       - 2379
     volumes:
       - etcd1-clust:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd1-clust
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd1-clust:2379
-      - -listen-client-urls
-      - http://172.21.0.72:2379
-      - -initial-advertise-peer-urls
-      - http://etcd1-clust:2380
-      - -listen-peer-urls
-      - http://172.21.0.72:2380
-      - -initial-cluster
-      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd1-clust
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd1-clust:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.72:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.72:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd1-clust:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-clust-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd2-clust:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -239,22 +210,17 @@ services:
       - 2379
     volumes:
       - etcd2-clust:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd2-clust
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd2-clust:2379
-      - -listen-client-urls
-      - http://172.21.0.73:2379
-      - -initial-advertise-peer-urls
-      - http://etcd2-clust:2380
-      - -listen-peer-urls
-      - http://172.21.0.73:2380
-      - -initial-cluster
-      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd2-clust
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd2-clust:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.73:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.73:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd2-clust:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-clust-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+
 
   etcd0-dist:
     build:
@@ -270,22 +236,16 @@ services:
       - 2379
     volumes:
       - etcd0-dist:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd0-dist
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd0-dist:2379
-      - -listen-client-urls
-      - http://172.21.0.81:2379
-      - -initial-advertise-peer-urls
-      - http://etcd0-dist:2380
-      - -listen-peer-urls
-      - http://172.21.0.81:2380
-      - -initial-cluster
-      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd0-dist
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd0-dist:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.81:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.81:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd0-dist:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-dist-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd1-dist:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -300,22 +260,16 @@ services:
       - 2379
     volumes:
       - etcd1-dist:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd1-dist
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd1-dist:2379
-      - -listen-client-urls
-      - http://172.21.0.82:2379
-      - -initial-advertise-peer-urls
-      - http://etcd1-dist:2380
-      - -listen-peer-urls
-      - http://172.21.0.82:2380
-      - -initial-cluster
-      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd1-dist
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd1-dist:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.82:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.82:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd1-dist:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-dist-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
   etcd2-dist:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
@@ -330,22 +284,17 @@ services:
       - 2379
     volumes:
       - etcd2-dist:/etcd_data
-    command:
-      - /usr/local/bin/etcd
-      - -name
-      - etcd2-dist
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd2-dist:2379
-      - -listen-client-urls
-      - http://172.21.0.83:2379
-      - -initial-advertise-peer-urls
-      - http://etcd2-dist:2380
-      - -listen-peer-urls
-      - http://172.21.0.83:2380
-      - -initial-cluster
-      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - ETCD_NAME=etcd2-dist
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd2-dist:2380
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.83:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.83:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd2-dist:2379
+      - ETCD_INITIAL_CLUSTER_TOKEN=etcd-dist-cluster
+      - ETCD_INITIAL_CLUSTER=etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+      - ETCD_INITIAL_CLUSTER_STATE=new
+
 
 volumes:
   etcd0-cent:

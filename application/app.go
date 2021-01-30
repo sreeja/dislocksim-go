@@ -44,8 +44,9 @@ func main() {
 	placements := []string{"cent", "clust", "dist"}
 	for place := range placements {
 		// create etcd client
-		log.Println("Creating etcd client at", whoami, time.Now())
-		cli, err := clientv3.New(clientv3.Config{Endpoints: []string{"etcd" + strconv.Itoa(replicas[whoami]) + "-" + placements[place] + ":2379"}})
+		etcd_client_name := "etcd" + strconv.Itoa(replicas[whoami]) + "-" + placements[place] + ":2379"
+		log.Println("Creating etcd client", etcd_client_name, time.Now())
+		cli, err := clientv3.New(clientv3.Config{Endpoints: []string{etcd_client_name}})
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -91,6 +92,8 @@ func do(w http.ResponseWriter, r *http.Request) {
 
 func execute(app, op, granularity, oplock, locktype string) error {
 	start := time.Now()
+	defer logexectime(app, op, start)
+
 	timetosleep, err := getexectime(app, op)
 	if err != nil {
 		return err
@@ -108,30 +111,39 @@ func execute(app, op, granularity, oplock, locktype string) error {
 		// 	l1 = val
 		// } else {
 		l1 := rwlock.NewRWMutex(sessions[locks[l].Type.Placement], locks[l].Name)
+		// log.Println(l1.s.Client())
 		// 	reallocks[locks[l].Name] = l1
 		// }
 		if locks[l].Mode == "shared" {
+			log.Println("Asked read lock", locks[l].Name, time.Now())
 			rlerr := l1.RLock()
 			defer l1.RUnlock()
+			defer log.Println("Releasing read lock", time.Now())
 			if rlerr != nil {
 				return rlerr
 			}
+			log.Println("Got read lock", time.Now())
 		} else {
+			log.Println("Asked lock", locks[l].Name, time.Now())
 			wlerr := l1.Lock()
 			defer l1.Unlock()
+			defer log.Println("Releasing lock", time.Now())
 			if wlerr != nil {
 				return wlerr
 			}
+			log.Println("Got lock", time.Now())
 		}
 	}
+	log.Println("Executing op", time.Now())
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
-	defer logexectime(app, op, start)
+	log.Println("Finished execution", time.Now())
 	return nil
 }
 
 func logexectime(app, op string, start time.Time) {
 	t := time.Now()
 	elapsed := t.Sub(start)
+	log.Printf("started at %v, finished at %v", start, t)
 	log.Printf("execution time for %v, %v :%v", app, op, elapsed)
 }
 
