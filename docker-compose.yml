@@ -74,98 +74,286 @@ services:
     command: go run .
 
 
-  etcd0:
+  etcd0-cent:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
-    container_name: etcd0
+    container_name: etcd0-cent
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.41
+        ipv4_address: 172.21.0.61
     ports:
       - 2379
     volumes:
-      - etcd0:/etcd_data
+      - etcd0-cent:/etcd_data
     command:
       - /usr/local/bin/etcd
       - -name
-      - etcd0
+      - etcd0-cent
       - --data-dir
       - /etcd_data
       - -advertise-client-urls
-      - http://etcd0:2379
+      - http://etcd0-cent:2379
       - -listen-client-urls
-      - http://172.21.0.41:2379
+      - http://172.21.0.61:2379
       - -initial-advertise-peer-urls
-      - http://etcd0:2380
+      - http://etcd0-cent:2380
       - -listen-peer-urls
-      - http://172.21.0.41:2380
+      - http://172.21.0.61:2380
       - -initial-cluster
-      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
-  etcd1:
+      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+  etcd1-cent:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
-    container_name: etcd1
+    container_name: etcd1-cent
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.42
+        ipv4_address: 172.21.0.62
     ports:
       - 2379
     volumes:
-      - etcd1:/etcd_data
+      - etcd1-cent:/etcd_data
     command:
       - /usr/local/bin/etcd
       - -name
-      - etcd1
+      - etcd1-cent
       - --data-dir
       - /etcd_data
       - -advertise-client-urls
-      - http://etcd1:2379
+      - http://etcd1-cent:2379
       - -listen-client-urls
-      - http://172.21.0.42:2379
+      - http://172.21.0.62:2379
       - -initial-advertise-peer-urls
-      - http://etcd1:2380
+      - http://etcd1-cent:2380
       - -listen-peer-urls
-      - http://172.21.0.42:2380
+      - http://172.21.0.62:2380
       - -initial-cluster
-      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
-  etcd2:
+      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+  etcd2-cent:
     build:
       context: ./bitnami-docker-etcd/3/debian-10
       dockerfile: Dockerfile
     cap_add:
       - NET_ADMIN
-    container_name: etcd2
+    container_name: etcd2-cent
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.43
+        ipv4_address: 172.21.0.63
     ports:
       - 2379
     volumes:
-      - etcd2:/etcd_data
+      - etcd2-cent:/etcd_data
     command:
       - /usr/local/bin/etcd
       - -name
-      - etcd2
+      - etcd2-cent
       - --data-dir
       - /etcd_data
       - -advertise-client-urls
-      - http://etcd2:2379
+      - http://etcd2-cent:2379
       - -listen-client-urls
-      - http://172.21.0.43:2379
+      - http://172.21.0.63:2379
       - -initial-advertise-peer-urls
-      - http://etcd2:2380
+      - http://etcd2-cent:2380
       - -listen-peer-urls
-      - http://172.21.0.43:2380
+      - http://172.21.0.63:2380
       - -initial-cluster
-      - etcd0=http://etcd0:2380,etcd1=http://etcd1:2380,etcd2=http://etcd2:2380
+      - etcd0-cent=http://etcd0-cent:2380,etcd1-cent=http://etcd1-cent:2380,etcd2-cent=http://etcd2-cent:2380
+
+  etcd0-clust:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd0-clust
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.71
+    ports:
+      - 2379
+    volumes:
+      - etcd0-clust:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd0-clust
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd0-clust:2379
+      - -listen-client-urls
+      - http://172.21.0.71:2379
+      - -initial-advertise-peer-urls
+      - http://etcd0-clust:2380
+      - -listen-peer-urls
+      - http://172.21.0.71:2380
+      - -initial-cluster
+      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+  etcd1-clust:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd1-clust
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.72
+    ports:
+      - 2379
+    volumes:
+      - etcd1-clust:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd1-clust
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd1-clust:2379
+      - -listen-client-urls
+      - http://172.21.0.72:2379
+      - -initial-advertise-peer-urls
+      - http://etcd1-clust:2380
+      - -listen-peer-urls
+      - http://172.21.0.72:2380
+      - -initial-cluster
+      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+  etcd2-clust:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd2-clust
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.73
+    ports:
+      - 2379
+    volumes:
+      - etcd2-clust:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd2-clust
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd2-clust:2379
+      - -listen-client-urls
+      - http://172.21.0.73:2379
+      - -initial-advertise-peer-urls
+      - http://etcd2-clust:2380
+      - -listen-peer-urls
+      - http://172.21.0.73:2380
+      - -initial-cluster
+      - etcd0-clust=http://etcd0-clust:2380,etcd1-clust=http://etcd1-clust:2380,etcd2-clust=http://etcd2-clust:2380
+
+  etcd0-dist:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd0-dist
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.81
+    ports:
+      - 2379
+    volumes:
+      - etcd0-dist:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd0-dist
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd0-dist:2379
+      - -listen-client-urls
+      - http://172.21.0.81:2379
+      - -initial-advertise-peer-urls
+      - http://etcd0-dist:2380
+      - -listen-peer-urls
+      - http://172.21.0.81:2380
+      - -initial-cluster
+      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+  etcd1-dist:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd1-dist
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.82
+    ports:
+      - 2379
+    volumes:
+      - etcd1-dist:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd1-dist
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd1-dist:2379
+      - -listen-client-urls
+      - http://172.21.0.82:2379
+      - -initial-advertise-peer-urls
+      - http://etcd1-dist:2380
+      - -listen-peer-urls
+      - http://172.21.0.82:2380
+      - -initial-cluster
+      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
+  etcd2-dist:
+    build:
+      context: ./bitnami-docker-etcd/3/debian-10
+      dockerfile: Dockerfile
+    cap_add:
+      - NET_ADMIN
+    container_name: etcd2-dist
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.83
+    ports:
+      - 2379
+    volumes:
+      - etcd2-dist:/etcd_data
+    command:
+      - /usr/local/bin/etcd
+      - -name
+      - etcd2-dist
+      - --data-dir
+      - /etcd_data
+      - -advertise-client-urls
+      - http://etcd2-dist:2379
+      - -listen-client-urls
+      - http://172.21.0.83:2379
+      - -initial-advertise-peer-urls
+      - http://etcd2-dist:2380
+      - -listen-peer-urls
+      - http://172.21.0.83:2380
+      - -initial-cluster
+      - etcd0-dist=http://etcd0-dist:2380,etcd1-dist=http://etcd1-dist:2380,etcd2-dist=http://etcd2-dist:2380
 
 volumes:
-  etcd0:
-  etcd1:
-  etcd2:
+  etcd0-cent:
+  etcd1-cent:
+  etcd2-cent:
+  etcd0-clust:
+  etcd1-clust:
+  etcd2-clust:
+  etcd0-dist:
+  etcd1-dist:
+  etcd2-dist:

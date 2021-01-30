@@ -19,8 +19,8 @@ import (
 var replicas map[string]int
 var whoami string
 
-var cli *clientv3.Client
-var session *concurrency.Session
+// var cli *clientv3.Client
+var sessions map[string]*concurrency.Session
 
 func main() {
 	replicas = map[string]int{"houston": 0, "paris": 1, "singapore": 2}
@@ -39,22 +39,28 @@ func main() {
 
 	log.SetOutput(f)
 
-	// create etcd client
-	log.Println("Creating etcd client at", whoami, time.Now())
-	cli, err = clientv3.New(clientv3.Config{Endpoints: []string{"etcd" + strconv.Itoa(replicas[whoami]) + ":2379"}})
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer cli.Close()
+	sessions = map[string]*concurrency.Session{}
 
-	// create etcd client session
-	log.Println("Creating etcd session", time.Now())
-	//send TTL updates to server each 1s. If failed to send (client is down or without communications), lock will be released
-	session, err = concurrency.NewSession(cli, concurrency.WithTTL(1))
-	if err != nil {
-		log.Fatal(err)
+	placements := []string{"cent", "clust", "dist"}
+	for place := range placements {
+		// create etcd client
+		log.Println("Creating etcd client at", whoami, time.Now())
+		cli, err := clientv3.New(clientv3.Config{Endpoints: []string{"etcd" + strconv.Itoa(replicas[whoami]) + "-" + placements[place] + ":2379"}})
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer cli.Close()
+
+		// create etcd client session
+		log.Println("Creating etcd session", time.Now())
+		//send TTL updates to server each 1s. If failed to send (client is down or without communications), lock will be released
+		session, err := concurrency.NewSession(cli, concurrency.WithTTL(1))
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer session.Close()
+		sessions[placements[place]] = session
 	}
-	defer session.Close()
 
 	handleRequests()
 
@@ -101,7 +107,7 @@ func execute(app, op, granularity, oplock, locktype string) error {
 		// if val, ok := reallocks[locks[l].Name]; ok {
 		// 	l1 = val
 		// } else {
-		l1 := rwlock.NewRWMutex(session, locks[l].Name)
+		l1 := rwlock.NewRWMutex(sessions[locks[l].Type.Placement], locks[l].Name)
 		// 	reallocks[locks[l].Name] = l1
 		// }
 		if locks[l].Mode == "shared" {
