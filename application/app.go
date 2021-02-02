@@ -118,7 +118,7 @@ func execute(app, op, granularity, oplock, locktype string) error {
 			log.Println("Asked read lock", locks[l].Name, time.Now())
 			rlerr := l1.RLock()
 			defer l1.RUnlock()
-			defer log.Println("Releasing read lock", time.Now())
+			defer logwithtime("Releasing read lock")
 			if rlerr != nil {
 				return rlerr
 			}
@@ -127,7 +127,7 @@ func execute(app, op, granularity, oplock, locktype string) error {
 			log.Println("Asked lock", locks[l].Name, time.Now())
 			wlerr := l1.Lock()
 			defer l1.Unlock()
-			defer log.Println("Releasing lock", time.Now())
+			defer logwithtime("Releasing lock")
 			if wlerr != nil {
 				return wlerr
 			}
@@ -138,6 +138,10 @@ func execute(app, op, granularity, oplock, locktype string) error {
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
 	log.Println("Finished execution", time.Now())
 	return nil
+}
+
+func logwithtime(text string) {
+	log.Println(text, time.Now())
 }
 
 func logexectime(app, op string, start time.Time) {
