@@ -13,6 +13,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -75,12 +76,26 @@ func handleRequests() {
 
 func do(w http.ResponseWriter, r *http.Request) {
 	args := r.URL.Query()
-	app := args["app"][0]
 	op := args["op"][0]
+	paramstring := args["params"][0]
+	// log.Println(paramstring)
+	params := []string{}
+	splitparams := strings.Split(paramstring, ",")
+	for each := range splitparams {
+		kv := strings.Split(splitparams[each], "-")
+		params = append(params, kv[1])
+	}
+	log.Println(params)
+	// for each in paramstring.split(","):
+	//     kv = each.split("-")
+	//     params[kv[0]] = kv[1]
+
+	// print(op, params, flush=True)
+	app := os.Getenv("APP")
 	granularity := os.Getenv("GRANULARITY")
 	oplock := os.Getenv("MODE")
 	locktype := os.Getenv("PLACEMENT")
-	err := execute(app, op, granularity, oplock, locktype)
+	err := execute(app, op, params, granularity, oplock, locktype)
 	if err != nil {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte(err.Error() + "\n"))
@@ -90,7 +105,7 @@ func do(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func execute(app, op, granularity, oplock, locktype string) error {
+func execute(app, op string, params []string, granularity, oplock, locktype string) error {
 	start := time.Now()
 	defer logexectime(app, op, start)
 
@@ -99,7 +114,7 @@ func execute(app, op, granularity, oplock, locktype string) error {
 		return err
 	}
 
-	locks, err := getlocks(app, op, granularity, oplock, locktype)
+	locks, err := getlocks(app, op, params, granularity, oplock, locktype)
 	if err != nil {
 		return err
 	}
@@ -189,7 +204,7 @@ func getlockconfigs(appname, opname, granularity, oplock, locktype string) ([]Op
 	return oplocks, locktypes, nil
 }
 
-func getlocks(appname, opname, granularity, oplock, locktype string) ([]Lock, error) {
+func getlocks(appname, opname string, params []string, granularity, oplock, locktype string) ([]Lock, error) {
 	oplocks, locktypes, err := getlockconfigs(appname, opname, granularity, oplock, locktype)
 	if err != nil {
 		return nil, err
@@ -201,7 +216,8 @@ func getlocks(appname, opname, granularity, oplock, locktype string) ([]Lock, er
 			for l := range oplocks[o].Locks {
 				for t := range locktypes {
 					if locktypes[t].Name == oplocks[o].Locks[l].Name {
-						lock := Lock{oplocks[o].Locks[l].Name, oplocks[o].Locks[l].Mode, locktypes[t]}
+						lockName := oplocks[o].Locks[l].Name + strings.Join(params, "_")
+						lock := Lock{lockName, oplocks[o].Locks[l].Mode, locktypes[t]}
 						locks = append(locks, lock)
 					}
 				}

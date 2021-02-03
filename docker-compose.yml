@@ -16,6 +16,7 @@ services:
       - "./data/houston:/usr/data"
     environment:
       - WHOAMI=houston
+      - APP=${APP}
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
@@ -38,6 +39,7 @@ services:
       - "./data/paris:/usr/data"
     environment:
       - WHOAMI=paris
+      - APP=${APP}
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
@@ -60,6 +62,7 @@ services:
       - "./data/singapore:/usr/data"
     environment:
       - WHOAMI=singapore
+      - APP=${APP}
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
