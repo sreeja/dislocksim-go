@@ -22,3 +22,4 @@ bitnami-docker-etcd/LICENSE
 bitnami-docker-etcd/README.md
 bitnami-docker-etcd/3/debian-10/docker-compose.yml
 bitnami-docker-etcd/3/debian-10/prebuildfs/opt/bitnami/licenses/licenses.txt
+*/.DS_Store

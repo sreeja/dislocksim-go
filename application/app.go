@@ -7,6 +7,7 @@ import (
 
 	"encoding/json"
 	"errors"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -69,9 +70,13 @@ func main() {
 }
 
 func handleRequests() {
-	http.HandleFunc("/do", do)
+	router := mux.NewRouter()
+	router.HandleFunc("/do", do).Methods("GET")
+	router.HandleFunc("/do", do).Methods("POST")
+	router.HandleFunc("/do", do).Methods("PUT")
+	router.HandleFunc("/do", do).Methods("DELETE")
 	log.Println("Listening at port 6000", time.Now())
-	log.Fatal(http.ListenAndServe(":6000", nil))
+	log.Fatal(http.ListenAndServe(":6000", router))
 }
 
 func do(w http.ResponseWriter, r *http.Request) {
