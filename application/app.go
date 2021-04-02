@@ -13,7 +13,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
-	"strconv"
+	// "strconv"
 	"strings"
 	"time"
 )
@@ -43,10 +43,11 @@ func main() {
 
 	sessions = map[string]*concurrency.Session{}
 
-	placements := []string{"cent", "clust", "dist"}
+	// placements := []string{"cent", "clust", "dist"}
+	placements := []string{"houston", "paris", "singapore"}
 	for place := range placements {
 		// create etcd client
-		etcd_client_name := "etcd" + strconv.Itoa(replicas[whoami]) + "-" + placements[place] + ":2379"
+		etcd_client_name := "etcd-" + placements[place] + ":2379"
 		log.Println("Creating etcd client", etcd_client_name, time.Now())
 		cli, err := clientv3.New(clientv3.Config{Endpoints: []string{etcd_client_name}})
 		if err != nil {
@@ -80,6 +81,7 @@ func handleRequests() {
 }
 
 func do(w http.ResponseWriter, r *http.Request) {
+	start := time.Now()
 	args := r.URL.Query()
 	op := args["op"][0]
 	paramstring := args["params"][0]
@@ -102,11 +104,14 @@ func do(w http.ResponseWriter, r *http.Request) {
 	locktype := os.Getenv("PLACEMENT")
 	err := execute(app, op, params, granularity, oplock, locktype)
 	if err != nil {
+		elapsed := time.Since(start)
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(err.Error() + "\n"))
+		w.Write([]byte(err.Error() + elapsed.String() + "\n"))
 	} else {
+		elapsed := time.Since(start)
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("Successful request!\n"))
+		// w.Write([]byte("Successful request! Took " + elapsed.String() + "\n"))
+		w.Write([]byte(elapsed.String() + "\n"))
 	}
 }
 
