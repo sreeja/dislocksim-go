@@ -20,6 +20,10 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    depends_on:
+      - lmhouston
+      - lmparis
+      - lmsingapore
     cap_add:
       - NET_ADMIN
     container_name: houston
@@ -43,6 +47,10 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    depends_on:
+      - lmhouston
+      - lmparis
+      - lmsingapore
     cap_add:
       - NET_ADMIN
     container_name: paris
@@ -66,6 +74,10 @@ services:
       - GRANULARITY=${GRANULARITY}
       - MODE=${MODE}
       - PLACEMENT=${PLACEMENT}
+    depends_on:
+      - lmhouston
+      - lmparis
+      - lmsingapore
     cap_add:
       - NET_ADMIN
     container_name: singapore
@@ -74,6 +86,64 @@ services:
         ipv4_address: 172.21.0.53
     ports:
       - 6003:6000
+    command: go run .
+
+
+  lmhouston:
+    build:
+      context: ./lockmanager
+      dockerfile: Dockerfile
+    volumes:
+      - "./lockmanager:/usr/app"
+      - "./lockdata/houston:/usr/data"
+    environment:
+      - WHEREAMI=houston
+    cap_add:
+      - NET_ADMIN
+    container_name: lmhouston
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.65
+    ports:
+      - 8001:8000
+    command: go run .
+
+  lmparis:
+    build:
+      context: ./lockmanager
+      dockerfile: Dockerfile
+    volumes:
+      - "./lockmanager:/usr/app"
+      - "./lockdata/paris:/usr/data"
+    environment:
+      - WHEREAMI=paris
+    cap_add:
+      - NET_ADMIN
+    container_name: lmparis
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.66
+    ports:
+      - 8002:8000
+    command: go run .
+
+  lmsingapore:
+    build:
+      context: ./lockmanager
+      dockerfile: Dockerfile
+    volumes:
+      - "./lockmanager:/usr/app"
+      - "./lockdata/singapore:/usr/data"
+    environment:
+      - WHEREAMI=singapore
+    cap_add:
+      - NET_ADMIN
+    container_name: lmsingapore
+    networks:
+      dislocknet:
+        ipv4_address: 172.21.0.67
+    ports:
+      - 8003:8000
     command: go run .
 
 

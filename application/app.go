@@ -1,19 +1,18 @@
 package main
 
 import (
-	"github.com/sreeja/etcd-exp/rwlock"
-	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/clientv3/concurrency"
-
+	"bufio"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"sort"
-	// "strconv"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -21,10 +20,10 @@ import (
 var replicas map[string]int
 var whoami string
 
-// var cli *clientv3.Client
-var sessions map[string]*concurrency.Session
+var lockmanagers map[string]net.Conn
 
 func main() {
+	time.Sleep(time.Duration(5000) * time.Millisecond)
 	replicas = map[string]int{"houston": 0, "paris": 1, "singapore": 2}
 	whoami = os.Getenv("WHOAMI")
 	if _, ok := replicas[whoami]; !ok {
@@ -41,29 +40,18 @@ func main() {
 
 	log.SetOutput(f)
 
-	sessions = map[string]*concurrency.Session{}
+	lockmanagers = map[string]net.Conn{}
 
-	// placements := []string{"cent", "clust", "dist"}
 	placements := []string{"houston", "paris", "singapore"}
-	for place := range placements {
-		// create etcd client
-		etcd_client_name := "etcd-" + placements[place] + ":2379"
-		log.Println("Creating etcd client", etcd_client_name, time.Now())
-		cli, err := clientv3.New(clientv3.Config{Endpoints: []string{etcd_client_name}})
+	for _, place := range placements {
+		// create lockmanager connection
+		log.Println("Creating lock manager session at replica", place, strconv.Itoa(replicas[place]), time.Now())
+		conn, err := net.Dial("tcp", "lm"+place+":8000") //+strconv.Itoa(replicas[place]+1))
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer cli.Close()
-
-		// create etcd client session
-		log.Println("Creating etcd session", time.Now())
-		//send TTL updates to server each 1s. If failed to send (client is down or without communications), lock will be released
-		session, err := concurrency.NewSession(cli, concurrency.WithTTL(1))
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer session.Close()
-		sessions[placements[place]] = session
+		defer conn.Close()
+		lockmanagers[place] = conn
 	}
 
 	handleRequests()
@@ -92,7 +80,7 @@ func do(w http.ResponseWriter, r *http.Request) {
 		kv := strings.Split(splitparams[each], "-")
 		params = append(params, kv[1])
 	}
-	log.Println(params)
+	// log.Println(params)
 	// for each in paramstring.split(","):
 	//     kv = each.split("-")
 	//     params[kv[0]] = kv[1]
@@ -102,16 +90,17 @@ func do(w http.ResponseWriter, r *http.Request) {
 	granularity := os.Getenv("GRANULARITY")
 	oplock := os.Getenv("MODE")
 	locktype := os.Getenv("PLACEMENT")
+	processtime := time.Since(start)
 	err := execute(app, op, params, granularity, oplock, locktype)
 	if err != nil {
 		elapsed := time.Since(start)
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(err.Error() + elapsed.String() + "\n"))
+		w.Write([]byte(err.Error() + elapsed.String() + "processing time" + processtime.String() + "\n"))
 	} else {
 		elapsed := time.Since(start)
 		w.WriteHeader(http.StatusOK)
 		// w.Write([]byte("Successful request! Took " + elapsed.String() + "\n"))
-		w.Write([]byte(elapsed.String() + "\n"))
+		w.Write([]byte(elapsed.String() + "processing time" + processtime.String() + "\n"))
 	}
 }
 
@@ -119,49 +108,58 @@ func execute(app, op string, params []string, granularity, oplock, locktype stri
 	start := time.Now()
 	defer logexectime(app, op, start)
 
-	timetosleep, err := getexectime(app, op)
-	if err != nil {
-		return err
-	}
+	timetosleep := 5000
 
 	locks, err := getlocks(app, op, params, granularity, oplock, locktype)
 	if err != nil {
 		return err
 	}
 
-	// reallocks := map[string]*rwlock.RWMutex{}
+	locklist := map[string]string{}
+	for r, _ := range replicas {
+		locklist[r] = ""
+	}
+
 	for l := range locks {
-		// var l1 *rwlock.RWMutex
-		// if val, ok := reallocks[locks[l].Name]; ok {
-		// 	l1 = val
-		// } else {
-		l1 := rwlock.NewRWMutex(sessions[locks[l].Type.Placement], locks[l].Name)
-		// log.Println(l1.s.Client())
-		// 	reallocks[locks[l].Name] = l1
-		// }
 		if locks[l].Mode == "shared" {
-			log.Println("Asked read lock", locks[l].Name, time.Now())
-			rlerr := l1.RLock()
-			defer l1.RUnlock()
-			defer logwithtime("Releasing read lock")
-			if rlerr != nil {
-				return rlerr
-			}
-			log.Println("Got read lock", time.Now())
+			locklist[locks[l].Type.Placement] = locklist[locks[l].Type.Placement] + ";S:" + locks[l].Name
 		} else {
-			log.Println("Asked lock", locks[l].Name, time.Now())
-			wlerr := l1.Lock()
-			defer l1.Unlock()
-			defer logwithtime("Releasing lock")
-			if wlerr != nil {
-				return wlerr
-			}
-			log.Println("Got lock", time.Now())
+			locklist[locks[l].Type.Placement] = locklist[locks[l].Type.Placement] + ";X:" + locks[l].Name
 		}
 	}
+
+	for rep, locks := range locklist {
+		if len(locks) > 1 {
+			log.Println("Asked locklist", rep, locks, time.Now())
+			// send to server
+			fmt.Fprintf(lockmanagers[rep], "acquire"+locks+"\n")
+			// wait for reply
+			_, err := bufio.NewReader(lockmanagers[rep]).ReadString('\n')
+			if err != nil {
+				log.Println("Lock acquisition failed", rep, time.Now())
+			}
+			log.Println("Got locklist", rep, time.Now())
+		}
+	}
+
 	log.Println("Executing op", time.Now())
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
 	log.Println("Finished execution", time.Now())
+
+	for rep, locks := range locklist {
+		if len(locks) > 1 {
+			log.Println("Releasing locklist", rep, locks, time.Now())
+			// send to server
+			fmt.Fprintf(lockmanagers[rep], "release"+locks+"\n")
+			// wait for reply
+			_, err := bufio.NewReader(lockmanagers[rep]).ReadString('\n')
+			if err != nil {
+				log.Println("Lock release failed", rep, time.Now())
+			}
+			log.Println("Released locklist", rep, time.Now())
+		}
+	}
+
 	return nil
 }
 
@@ -172,7 +170,7 @@ func logwithtime(text string) {
 func logexectime(app, op string, start time.Time) {
 	t := time.Now()
 	elapsed := t.Sub(start)
-	log.Printf("started at %v, finished at %v", start, t)
+	log.Printf("started at %v, \n finished at %v", start, t)
 	log.Printf("execution time for %v, %v :%v", app, op, elapsed)
 }
 
