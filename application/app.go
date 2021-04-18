@@ -108,7 +108,7 @@ func execute(app, op string, params []string, granularity, oplock, locktype stri
 	start := time.Now()
 	defer logexectime(app, op, start)
 
-	timetosleep := 5000
+	timetosleep := 0 //5000
 
 	locks, err := getlocks(app, op, params, granularity, oplock, locktype)
 	if err != nil {

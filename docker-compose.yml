@@ -103,7 +103,7 @@ services:
     container_name: lmhouston
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.65
+        ipv4_address: 172.21.0.61
     ports:
       - 8001:8000
     command: go run .
@@ -122,7 +122,7 @@ services:
     container_name: lmparis
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.66
+        ipv4_address: 172.21.0.62
     ports:
       - 8002:8000
     command: go run .
@@ -141,7 +141,7 @@ services:
     container_name: lmsingapore
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.67
+        ipv4_address: 172.21.0.63
     ports:
       - 8003:8000
     command: go run .
@@ -156,7 +156,7 @@ services:
     container_name: etcd-houston
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.61
+        ipv4_address: 172.21.0.81
     ports:
       - 2379
     volumes:
@@ -165,8 +165,8 @@ services:
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_NAME=etcd-houston
       - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-houston:2380
-      - ETCD_LISTEN_PEER_URLS=http://172.21.0.61:2380
-      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.61:2379
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.81:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.81:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-houston:2379
       - ETCD_INITIAL_CLUSTER_TOKEN=etcd-houston-cluster
       - ETCD_INITIAL_CLUSTER=etcd-houston=http://etcd-houston:2380
@@ -182,7 +182,7 @@ services:
     container_name: etcd-paris
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.71
+        ipv4_address: 172.21.0.82
     ports:
       - 2379
     volumes:
@@ -191,8 +191,8 @@ services:
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_NAME=etcd-paris
       - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-paris:2380
-      - ETCD_LISTEN_PEER_URLS=http://172.21.0.71:2380
-      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.71:2379
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.82:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.82:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-paris:2379
       - ETCD_INITIAL_CLUSTER_TOKEN=etcd-paris-cluster
       - ETCD_INITIAL_CLUSTER=etcd-paris=http://etcd-paris:2380
@@ -208,7 +208,7 @@ services:
     container_name: etcd-singapore
     networks:
       dislocknet:
-        ipv4_address: 172.21.0.81
+        ipv4_address: 172.21.0.83
     ports:
       - 2379
     volumes:
@@ -217,8 +217,8 @@ services:
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_NAME=etcd-singapore
       - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd-singapore:2380
-      - ETCD_LISTEN_PEER_URLS=http://172.21.0.81:2380
-      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.81:2379
+      - ETCD_LISTEN_PEER_URLS=http://172.21.0.83:2380
+      - ETCD_LISTEN_CLIENT_URLS=http://172.21.0.83:2379
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd-singapore:2379
       - ETCD_INITIAL_CLUSTER_TOKEN=etcd-singapore-cluster
       - ETCD_INITIAL_CLUSTER=etcd-singapore=http://etcd-singapore:2380
