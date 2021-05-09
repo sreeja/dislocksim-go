@@ -54,6 +54,12 @@ func main() {
 		lockmanagers[place] = conn
 	}
 
+	// log.Println("reversed")
+	// for rep := range placements {
+	// 	revrep := len(placements) - 1 - rep
+	// 	log.Println(placements[revrep])
+	// }
+
 	handleRequests()
 
 }
@@ -128,17 +134,18 @@ func execute(app, op string, params []string, granularity, oplock, locktype stri
 		}
 	}
 
-	for rep, locks := range locklist {
-		if len(locks) > 1 {
-			log.Println("Asked locklist", rep, locks, time.Now())
+	placements := []string{"houston", "paris", "singapore"}
+	for rep := range placements {
+		if len(locklist[placements[rep]]) > 1 {
+			log.Println("Asked locklist", placements[rep], locklist[placements[rep]], time.Now())
 			// send to server
-			fmt.Fprintf(lockmanagers[rep], "acquire"+locks+"\n")
+			fmt.Fprintf(lockmanagers[placements[rep]], "acquire"+locklist[placements[rep]]+"\n")
 			// wait for reply
-			_, err := bufio.NewReader(lockmanagers[rep]).ReadString('\n')
+			_, err := bufio.NewReader(lockmanagers[placements[rep]]).ReadString('\n')
 			if err != nil {
-				log.Println("Lock acquisition failed", rep, time.Now())
+				log.Println("Lock acquisition failed", placements[rep], time.Now())
 			}
-			log.Println("Got locklist", rep, time.Now())
+			log.Println("Got locklist", placements[rep], time.Now())
 		}
 	}
 
@@ -146,17 +153,18 @@ func execute(app, op string, params []string, granularity, oplock, locktype stri
 	time.Sleep(time.Duration(timetosleep) * time.Millisecond)
 	log.Println("Finished execution", time.Now())
 
-	for rep, locks := range locklist {
-		if len(locks) > 1 {
-			log.Println("Releasing locklist", rep, locks, time.Now())
+	for rep := range placements {
+		revrep := len(placements) - 1 - rep
+		if len(locklist[placements[revrep]]) > 1 {
+			log.Println("Releasing locklist", placements[revrep], locklist[placements[revrep]], time.Now())
 			// send to server
-			fmt.Fprintf(lockmanagers[rep], "release"+locks+"\n")
+			fmt.Fprintf(lockmanagers[placements[revrep]], "release"+locklist[placements[revrep]]+"\n")
 			// wait for reply
-			_, err := bufio.NewReader(lockmanagers[rep]).ReadString('\n')
+			_, err := bufio.NewReader(lockmanagers[placements[revrep]]).ReadString('\n')
 			if err != nil {
-				log.Println("Lock release failed", rep, time.Now())
+				log.Println("Lock release failed", placements[revrep], time.Now())
 			}
-			log.Println("Released locklist", rep, time.Now())
+			log.Println("Released locklist", placements[revrep], time.Now())
 		}
 	}
 
